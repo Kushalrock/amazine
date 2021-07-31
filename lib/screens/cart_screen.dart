@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+
+// Third party packages imports
 import 'package:provider/provider.dart';
 
 // Providers Imports
 import '../providers/cart.dart';
+import '../providers/orders.dart';
 
 // Screen Imports
 import '../widgets/cart_item.dart';
@@ -35,7 +38,7 @@ class CartScreen extends StatelessWidget {
                   Consumer<Cart>(
                     builder: (ctx, cartData, _) => Chip(
                       label: Text(
-                        '\$${cartData.totalAmount}',
+                        '\$${cartData.totalAmount.toStringAsFixed(2)}',
                         style: TextStyle(
                           color: Theme.of(context).primaryTextTheme.title.color,
                         ),
@@ -44,7 +47,11 @@ class CartScreen extends StatelessWidget {
                     ),
                   ),
                   FlatButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Provider.of<Orders>(context, listen: false).addOrder(
+                          cart.items.values.toList(), cart.totalAmount);
+                      cart.clear();
+                    },
                     child: Text('ORDER NOW!!'),
                     textColor: Theme.of(context).primaryColor,
                   ),
