@@ -13,6 +13,7 @@ import '../screens/cart_screen.dart';
 
 // Provider Imports
 import '../providers/cart.dart';
+import '../providers/products.dart';
 
 enum FilterOptions { Favorites, All }
 
@@ -23,6 +24,21 @@ class ProductsOverViewScreen extends StatefulWidget {
 
 class _ProductsOverViewScreenState extends State<ProductsOverViewScreen> {
   var _showOnlyFavorites = false;
+  var isInit = false;
+  var _isLoading = false;
+  @override
+  void didChangeDependencies() {
+    if (!isInit) {
+      _isLoading = true;
+      Provider.of<Products>(context).fetchAndSetProduct().then((value) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
+      isInit = true;
+    }
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +86,24 @@ class _ProductsOverViewScreenState extends State<ProductsOverViewScreen> {
         ],
       ),
       drawer: AppDrawer(),
-      body: ProductsGrid(_showOnlyFavorites),
+      body: _isLoading
+          ? Center(
+              child: Column(
+                children: [
+                  Text(
+                    'Fetching Products',
+                    style: TextStyle(fontSize: 28),
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  CircularProgressIndicator()
+                ],
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+              ),
+            )
+          : ProductsGrid(_showOnlyFavorites),
     );
   }
 }

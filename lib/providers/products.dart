@@ -1,7 +1,16 @@
-import 'package:flutter/cupertino.dart';
+// Dart libraries
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+
+// Third party packages
+import 'package:http/http.dart' as http;
 
 // Providers Imports
 import 'product.dart';
+
+// Model Imports
+import '../models/http_exception.dart';
 
 class Products with ChangeNotifier {
   List<Product> _items = [
@@ -51,26 +60,87 @@ class Products with ChangeNotifier {
     return _items.firstWhere((element) => element.id == id);
   }
 
-  void addProduct(Product product) {
-    final newProduct = Product(
-      title: product.title,
-      description: product.description,
-      imageUrl: product.imageUrl,
-      price: product.price,
-      id: DateTime.now().toString(),
-    );
-    _items.add(newProduct);
-    notifyListeners();
+  Future<void> fetchAndSetProduct() async {
+    const url = 'https://amazine-001-default-rtdb.firebaseio.com/products.json';
+    try {
+      final response = await http.get(url);
+      final extractedData = json.decode(response.body) as Map<String, dynamic>;
+      final List<Product> loadedProducts = [];
+      extractedData.forEach((key, value) {
+        loadedProducts.add(Product(
+          id: key,
+          title: value['title'],
+          description: value['description'],
+          imageUrl: value['imageUrl'],
+          price: value['price'],
+          isFavorite: value['isFavorite'],
+        ));
+      });
+
+      _items = loadedProducts;
+      notifyListeners();
+      print(extractedData);
+    } catch (e) {
+      throw (e);
+    }
   }
 
-  void updateProduct(String id, Product newProduct) {
+  Future<void> addProduct(Product product) {
+    const url = 'https://amazine-001-default-rtdb.firebaseio.com/products.json';
+    return http
+        .post(url,
+            body: json.encode({
+              'title': product.title,
+              'description': product.description,
+              'imageUrl': product.imageUrl,
+              'price': product.price,
+              'isFavorite': product.isFavorite,
+            }))
+        .then((value) {
+      final newProduct = Product(
+        title: product.title,
+        description: product.description,
+        imageUrl: product.imageUrl,
+        price: product.price,
+        id: json.decode(value.body)['name'],
+      );
+      _items.add(newProduct);
+      print(newProduct.id);
+      notifyListeners();
+    });
+  }
+
+  Future<void> updateProduct(String id, Product newProduct) async {
     final productIndex = _items.indexWhere((element) => element.id == id);
     _items[productIndex] = newProduct;
+    final url =
+        'https://amazine-001-default-rtdb.firebaseio.com/products/$id.json';
+    await http.patch(url,
+        body: json.encode({
+          'title': newProduct.title,
+          'description': newProduct.description,
+          'imageUrl': newProduct.imageUrl,
+          'price': newProduct.price,
+        }));
     notifyListeners();
   }
 
   void deleteProduct(String id) {
+    final existingProductindex =
+        _items.indexWhere((element) => element.id == id);
+    var existingProduct = _items[existingProductindex];
+    final url =
+        'https://amazine-001-default-rtdb.firebaseio.com/products/$id.json';
     _items.removeWhere((element) => element.id == id);
+    http.delete(url).then((response) {
+      if (response.statusCode >= 400) {
+        throw HTTPException("Couldn't delete the product");
+      }
+      existingProduct = null;
+    }).catchError((_) {
+      _items.insert(existingProductindex, existingProduct);
+      notifyListeners();
+    });
     notifyListeners();
   }
 }

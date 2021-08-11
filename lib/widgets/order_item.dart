@@ -43,7 +43,7 @@ class _OrderCardState extends State<OrderCard> {
           ),
           if (_expanded)
             Container(
-              height: min(widget.order.products.length * 20.0 + 10.0, 180.0),
+              height: min(widget.order.products.length * 20.0 + 40.0, 250.0),
               padding: EdgeInsets.all(10),
               child: ListView.builder(
                 itemBuilder: (ctx, i) => Row(
