@@ -9,6 +9,9 @@ import 'package:provider/provider.dart';
 // Providers Imports
 import '../providers/auth.dart';
 
+// Models imports
+import '../models/http_exception.dart';
+
 enum AuthMode { Signup, Login }
 
 class AuthScreen extends StatelessWidget {
@@ -106,6 +109,10 @@ class _AuthCardState extends State<AuthCard> {
   var _isLoading = false;
   final _passwordController = TextEditingController();
 
+  void _showError(String message) {
+    Scaffold.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState.validate()) {
       // Invalid!
@@ -115,16 +122,37 @@ class _AuthCardState extends State<AuthCard> {
     setState(() {
       _isLoading = true;
     });
-    if (_authMode == AuthMode.Login) {
-      await Provider.of<Auth>(context, listen: false).login(
-        _authData['email'],
-        _authData['password'],
-      );
-    } else {
-      await Provider.of<Auth>(context, listen: false).signUp(
-        _authData['email'],
-        _authData['password'],
-      );
+    try {
+      if (_authMode == AuthMode.Login) {
+        await Provider.of<Auth>(context, listen: false).login(
+          _authData['email'],
+          _authData['password'],
+        );
+      } else {
+        await Provider.of<Auth>(context, listen: false).signUp(
+          _authData['email'],
+          _authData['password'],
+        );
+      }
+    } on HTTPException catch (e) {
+      var errorMessage = 'Authentication Failed';
+      if (e.toString().contains('EMAIL_EXISTS')) {
+        errorMessage = "This email is already in use";
+      } else if (e.toString().contains('INVALID_EMAIL')) {
+        errorMessage = "The email entered is incorrect";
+      } else if (e.toString().contains('WEAK_PASSWORD')) {
+        errorMessage = "This password is ery weak";
+      } else if (e.toString().contains('EMAIL_NOT_FOUND')) {
+        errorMessage = "Couldn't find a user with that email";
+      } else if (e.toString().contains('INVALID_PASSWORD')) {
+        errorMessage = "Invalid Password";
+      }
+      _showError(errorMessage);
+    } catch (e) {
+      var errorMessage = _authMode == AuthMode.Login
+          ? 'Login Failed. Try Again'
+          : 'SignUp Failed. Try Again';
+      _showError(errorMessage);
     }
     setState(() {
       _isLoading = false;
