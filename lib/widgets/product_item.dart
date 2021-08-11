@@ -9,6 +9,7 @@ import '../screens/product_detail_screen.dart';
 // Provider Imports
 import '../providers/product.dart';
 import '../providers/cart.dart';
+import '../providers/auth.dart';
 
 class ProductItem extends StatelessWidget {
   @override
@@ -35,7 +36,8 @@ class ProductItem extends StatelessWidget {
           leading: Consumer<Product>(
             builder: (ctx, product, _) => IconButton(
               onPressed: () {
-                product.toggleFavoriteStatus();
+                product.toggleFavoriteStatus(
+                    Provider.of<Auth>(context, listen: false).token);
               },
               icon: Icon(
                 product.isFavorite ? Icons.favorite : Icons.favorite_outline,
