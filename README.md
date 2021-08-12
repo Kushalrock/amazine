@@ -1,16 +1,8 @@
-# amazine
+# Amazine
 
-A new Flutter project.
+This project is an advanced project made using flutter and firebase as the backend. Newer features are to be added, but as of know the app is completely usable. The app however uses older versions of flutter and needs to be migrated to null safety if you are checking this repository out in the near future. 
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Use
+```
+flutter run --no-sound-null-safety
+```
