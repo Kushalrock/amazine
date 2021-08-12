@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 // Third Party Packages
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Models Imports
 import '../models/http_exception.dart';
@@ -61,9 +62,44 @@ class Auth with ChangeNotifier {
       );
       _autoLogout();
       notifyListeners();
+      final prefs = await SharedPreferences.getInstance();
+      final userData = json.encode({
+        'token': _token,
+        'userId': _userId,
+        'expiryDate': _expirydate.toIso8601String()
+      });
+      // print(userData);
+      prefs.setString('userData', userData);
+      // print('$userData after save');
     } catch (error) {
       throw error;
     }
+  }
+
+  Future<bool> tryAutoLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = prefs.getString('userData');
+    if (data == null) {
+      return false;
+    }
+    final extractedUserData = json.decode(data) as Map<String, Object>;
+    final expiryDate = DateTime.parse(extractedUserData['expiryDate']);
+
+    if (expiryDate.isBefore(DateTime.now())) {
+      return false;
+    }
+    print(extractedUserData['token']);
+
+    _token = extractedUserData['token'];
+    _userId = extractedUserData['userId'];
+    _expirydate = expiryDate;
+
+    print('yes');
+
+    notifyListeners();
+    _autoLogout();
+
+    return true;
   }
 
   Future<void> signUp(String email, String password) async {
