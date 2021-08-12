@@ -49,8 +49,9 @@ class Products with ChangeNotifier {
   ];
 
   final String authToken;
+  final String userId;
 
-  Products(this.authToken, this._items);
+  Products(this.authToken, this.userId, this._items);
 
   List<Product> get items {
     return [..._items];
@@ -64,12 +65,22 @@ class Products with ChangeNotifier {
     return _items.firstWhere((element) => element.id == id);
   }
 
-  Future<void> fetchAndSetProduct() async {
+  Future<void> fetchAndSetProduct([bool filterByUser = false]) async {
+    final filterString =
+        filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
+
     final url =
-        'https://amazine-001-default-rtdb.firebaseio.com/products.json?auth=$authToken';
+        'https://amazine-001-default-rtdb.firebaseio.com/products.json?auth=$authToken&$filterString';
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
+      if (extractedData == null) {
+        return;
+      }
+      final favoriteUrl =
+          'https://amazine-001-default-rtdb.firebaseio.com/userFavorites/$userId.json?auth=$authToken';
+      final favoriteResponse = await http.get(favoriteUrl);
+      final favoriteData = json.decode(favoriteResponse.body);
       final List<Product> loadedProducts = [];
       extractedData.forEach((key, value) {
         loadedProducts.add(Product(
@@ -78,7 +89,7 @@ class Products with ChangeNotifier {
           description: value['description'],
           imageUrl: value['imageUrl'],
           price: value['price'],
-          isFavorite: value['isFavorite'],
+          isFavorite: favoriteData == null ? false : favoriteData[key] ?? false,
         ));
       });
 
@@ -100,7 +111,7 @@ class Products with ChangeNotifier {
               'description': product.description,
               'imageUrl': product.imageUrl,
               'price': product.price,
-              'isFavorite': product.isFavorite,
+              'creatorId': userId
             }))
         .then((value) {
       final newProduct = Product(
