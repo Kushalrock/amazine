@@ -1,5 +1,6 @@
 // Dart Pacakges
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 
@@ -13,6 +14,7 @@ class Auth with ChangeNotifier {
   String _token;
   DateTime _expirydate;
   String _userId;
+  Timer _authTimer;
 
   bool get isAuth {
     return token != null;
@@ -57,6 +59,7 @@ class Auth with ChangeNotifier {
           seconds: int.parse(responseData['expiresIn']),
         ),
       );
+      _autoLogout();
       notifyListeners();
     } catch (error) {
       throw error;
@@ -69,5 +72,23 @@ class Auth with ChangeNotifier {
 
   Future<void> login(String email, String password) async {
     return _authenticate(email, password, 'signInWithPassword');
+  }
+
+  void logout() {
+    _token = null;
+    _userId = null;
+    _expirydate = null;
+    if (_authTimer != null) {
+      _authTimer = null;
+    }
+    notifyListeners();
+  }
+
+  void _autoLogout() {
+    if (_authTimer != null) {
+      _authTimer.cancel();
+    }
+    final timeToExpiry = _expirydate.difference(DateTime.now()).inSeconds;
+    _authTimer = Timer(Duration(seconds: timeToExpiry), logout);
   }
 }
