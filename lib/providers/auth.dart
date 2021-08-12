@@ -17,6 +17,8 @@ class Auth with ChangeNotifier {
   String _userId;
   Timer _authTimer;
 
+  var _manualLogout = false;
+
   bool get isAuth {
     return token != null;
   }
@@ -62,11 +64,13 @@ class Auth with ChangeNotifier {
       );
       _autoLogout();
       notifyListeners();
+      _manualLogout = false;
       final prefs = await SharedPreferences.getInstance();
       final userData = json.encode({
         'token': _token,
         'userId': _userId,
-        'expiryDate': _expirydate.toIso8601String()
+        'expiryDate': _expirydate.toIso8601String(),
+        'manualLogout': _manualLogout
       });
       // print(userData);
       prefs.setString('userData', userData);
@@ -83,6 +87,10 @@ class Auth with ChangeNotifier {
       return false;
     }
     final extractedUserData = json.decode(data) as Map<String, Object>;
+    if (extractedUserData['manualLogout'] == null ||
+        extractedUserData['manualLogout'] == true) {
+      return false;
+    }
     final expiryDate = DateTime.parse(extractedUserData['expiryDate']);
 
     if (expiryDate.isBefore(DateTime.now())) {
@@ -110,7 +118,16 @@ class Auth with ChangeNotifier {
     return _authenticate(email, password, 'signInWithPassword');
   }
 
-  void logout() {
+  Future<void> logout() async {
+    _manualLogout = true;
+    final prefs = await SharedPreferences.getInstance();
+    final userData = json.encode({
+      'token': _token,
+      'userId': _userId,
+      'expiryDate': _expirydate.toIso8601String(),
+      'manualLogout': _manualLogout
+    });
+    prefs.setString('userData', userData);
     _token = null;
     _userId = null;
     _expirydate = null;
