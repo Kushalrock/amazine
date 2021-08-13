@@ -95,7 +95,6 @@ class Products with ChangeNotifier {
 
       _items = loadedProducts;
       notifyListeners();
-      print(extractedData);
     } catch (e) {
       throw (e);
     }
@@ -122,7 +121,6 @@ class Products with ChangeNotifier {
         id: json.decode(value.body)['name'],
       );
       _items.add(newProduct);
-      print(newProduct.id);
       notifyListeners();
     });
   }

@@ -6,15 +6,16 @@ import 'package:provider/provider.dart';
 // Provider Imports
 import '../providers/partner.dart';
 
-class SplashScreen extends StatelessWidget {
+class PartnerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: FlatButton(
+        child: RaisedButton(
           child: Text('Become Partner'),
           onPressed: () async {
-            await Provider.of<Partner>(context).becomePartner();
+            await Provider.of<Partner>(context, listen: false).becomePartner();
+            print('Done');
           },
         ),
       ),

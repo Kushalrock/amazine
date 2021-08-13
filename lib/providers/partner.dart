@@ -7,19 +7,27 @@ import 'package:http/http.dart' as http;
 
 class Partner with ChangeNotifier {
   bool _partner;
-  Future<bool> partnerStatus() async {
+  bool get partner {
+    return _partner;
+  }
+
+  Future<void> partnerStatus() async {
     final url =
         "https://amazine-001-default-rtdb.firebaseio.com/partners/$_userId.json?auth=$_authToken";
     final response = await http.get(url);
-    if (response == null) {
-      return false;
+    if (response.body == "null") {
+      _partner = false;
+      return;
     }
-    final extractedData = json.decode(response.body) as Map<String, Object>;
-    _partner = extractedData['partnerStatus'] as bool;
-    if (_partner == null) {
-      return false;
+    final extractedData = json.decode(response.body) as bool;
+    print(extractedData);
+    if (extractedData == null) {
+      _partner = false;
+      return;
     }
-    return extractedData['partnerStatus'] as bool;
+    _partner = extractedData;
+    print(_partner);
+    notifyListeners();
   }
 
   final String _authToken;
@@ -31,14 +39,26 @@ class Partner with ChangeNotifier {
     final url =
         "https://amazine-001-default-rtdb.firebaseio.com/partners/$_userId.json?auth=$_authToken";
     try {
-      final response = await http.post(
+      final response = await http.put(
         url,
-        body: json.encode({'partnerStatus': _partner}),
+        body: json.encode(_partner),
       );
     } catch (e) {
       throw (e);
     }
 
+    notifyListeners();
+  }
+
+  Future<void> revokePartnership() async {
+    _partner = false;
+    final url =
+        "https://amazine-001-default-rtdb.firebaseio.com/partners/$_userId.json?auth=$_authToken";
+    try {
+      await http.delete(url);
+    } catch (e) {
+      throw (e);
+    }
     notifyListeners();
   }
 }
