@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class Partner with ChangeNotifier {
-  bool _partner;
+  bool _partner = false;
   bool get partner {
     return _partner;
   }
@@ -46,6 +46,8 @@ class Partner with ChangeNotifier {
     } catch (e) {
       throw (e);
     }
+
+    print('Partnership granted.');
 
     notifyListeners();
   }
