@@ -5,9 +5,11 @@ import 'package:provider/provider.dart';
 
 // Providers imports
 import '../providers/products.dart';
+import '../providers/partner.dart';
 
 // SCreens Imports
 import '../screens/edit_product_screen.dart';
+import '../screens/partner_screen.dart';
 
 // Widgets Imports
 import '../widgets/user_product_item.dart';
@@ -33,37 +35,48 @@ class UserProductsScreen extends StatelessWidget {
             },
             icon: const Icon(Icons.add),
           ),
+          IconButton(
+            onPressed: () {
+              Provider.of<Partner>(context, listen: false).revokePartnership();
+            },
+            icon: Icon(
+              Icons.cancel,
+              color: Colors.red,
+            ),
+          ),
         ],
       ),
-      body: FutureBuilder(
-        future: _refreshProducts(context),
-        builder: (ctx, snapshot) =>
-            snapshot.connectionState == ConnectionState.waiting
-                ? Center(
-                    child: CircularProgressIndicator(),
-                  )
-                : RefreshIndicator(
-                    onRefresh: () => _refreshProducts(context),
-                    child: Consumer<Products>(
-                      builder: (ctx, productsData, _) => Padding(
-                        padding: EdgeInsets.all(10),
-                        child: ListView.builder(
-                          itemBuilder: (_, i) => Column(
-                            children: [
-                              UserProductItem(
-                                productsData.items[i].id,
-                                productsData.items[i].title,
-                                productsData.items[i].imageUrl,
+      body: Provider.of<Partner>(context).partner == false
+          ? PartnerScreen()
+          : FutureBuilder(
+              future: _refreshProducts(context),
+              builder: (ctx, snapshot) =>
+                  snapshot.connectionState == ConnectionState.waiting
+                      ? Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : RefreshIndicator(
+                          onRefresh: () => _refreshProducts(context),
+                          child: Consumer<Products>(
+                            builder: (ctx, productsData, _) => Padding(
+                              padding: EdgeInsets.all(10),
+                              child: ListView.builder(
+                                itemBuilder: (_, i) => Column(
+                                  children: [
+                                    UserProductItem(
+                                      productsData.items[i].id,
+                                      productsData.items[i].title,
+                                      productsData.items[i].imageUrl,
+                                    ),
+                                    Divider(),
+                                  ],
+                                ),
+                                itemCount: productsData.items.length,
                               ),
-                              Divider(),
-                            ],
+                            ),
                           ),
-                          itemCount: productsData.items.length,
                         ),
-                      ),
-                    ),
-                  ),
-      ),
+            ),
       drawer: AppDrawer(),
     );
   }

@@ -14,6 +14,7 @@ import '../screens/cart_screen.dart';
 // Provider Imports
 import '../providers/cart.dart';
 import '../providers/products.dart';
+import '../providers/partner.dart';
 
 enum FilterOptions { Favorites, All }
 
@@ -30,6 +31,7 @@ class _ProductsOverViewScreenState extends State<ProductsOverViewScreen> {
   void didChangeDependencies() {
     if (!isInit) {
       _isLoading = true;
+      Provider.of<Partner>(context).partnerStatus();
       Provider.of<Products>(context).fetchAndSetProduct().then((value) {
         setState(() {
           _isLoading = false;

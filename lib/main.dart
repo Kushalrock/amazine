@@ -18,6 +18,7 @@ import './providers/products.dart';
 import './providers/cart.dart';
 import './providers/orders.dart';
 import './providers/auth.dart';
+import './providers/partner.dart';
 
 void main() => runApp(MyApp());
 
@@ -38,6 +39,13 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider.value(
           value: Cart(),
+        ),
+        ChangeNotifierProxyProvider<Auth, Partner>(
+          create: (ctx) => Partner('', ''),
+          update: (ctx, auth, previousProducts) => Partner(
+            auth.token,
+            auth.userId,
+          ),
         ),
         ChangeNotifierProxyProvider<Auth, Orders>(
           create: (ctx) => Orders('', '', []),

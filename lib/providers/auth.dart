@@ -96,14 +96,10 @@ class Auth with ChangeNotifier {
     if (expiryDate.isBefore(DateTime.now())) {
       return false;
     }
-    print(extractedUserData['token']);
 
     _token = extractedUserData['token'];
     _userId = extractedUserData['userId'];
     _expirydate = expiryDate;
-
-    print('yes');
-
     notifyListeners();
     _autoLogout();
 

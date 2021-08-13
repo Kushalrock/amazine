@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 // Provider imports
 import '../providers/auth.dart';
+import '../providers/partner.dart';
 
 // Screen Imports
 import '../screens/orders_screen.dart';
@@ -40,7 +41,9 @@ class AppDrawer extends StatelessWidget {
           Divider(),
           ListTile(
             leading: Icon(Icons.payment),
-            title: Text('My Products'),
+            title: Provider.of<Partner>(context).partner == false
+                ? Text('Become a partner')
+                : Text('My Products'),
             onTap: () {
               Navigator.of(context)
                   .pushReplacementNamed(UserProductsScreen.routeName);
