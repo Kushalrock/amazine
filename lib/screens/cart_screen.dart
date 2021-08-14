@@ -105,7 +105,7 @@ class _OrderButtonState extends State<OrderButton> {
                     .addProductOrder(
                         widget.cart.items.keys.toList()[i],
                         widget.cart
-                            .FindProduct(widget.cart.items.keys.toList()[i]));
+                            .findProduct(widget.cart.items.keys.toList()[i]));
               }
               widget.cart.clear();
 

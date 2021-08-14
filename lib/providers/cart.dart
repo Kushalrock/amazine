@@ -35,7 +35,7 @@ class Cart with ChangeNotifier {
     return total;
   }
 
-  int FindProduct(String key) {
+  int findProduct(String key) {
     return _items[key].qty;
   }
 
