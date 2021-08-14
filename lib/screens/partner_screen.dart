@@ -16,6 +16,14 @@ class _PartnerScreenState extends State<PartnerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        child: Icon(
+          Icons.arrow_downward,
+        ),
+        backgroundColor: Colors.white70,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: SingleChildScrollView(
         padding: EdgeInsets.all(12),
         child: Column(
