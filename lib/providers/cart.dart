@@ -35,6 +35,10 @@ class Cart with ChangeNotifier {
     return total;
   }
 
+  int findProduct(String key) {
+    return _items[key].qty;
+  }
+
   void addItem(String productId, double price, String title, String imageUrl) {
     if (_items.containsKey(productId)) {
       _items.update(
@@ -49,7 +53,7 @@ class Cart with ChangeNotifier {
       _items.putIfAbsent(
           productId,
           () => CartItem(
-              id: DateTime.now().toString(),
+              id: productId,
               title: title,
               price: price,
               qty: 1,

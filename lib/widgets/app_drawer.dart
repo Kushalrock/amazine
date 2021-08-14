@@ -10,6 +10,7 @@ import '../providers/partner.dart';
 // Screen Imports
 import '../screens/orders_screen.dart';
 import '../screens/user_products_screen.dart';
+import '../screens/my_products_orders_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -40,6 +41,13 @@ class AppDrawer extends StatelessWidget {
           ),
           Divider(),
           ListTile(
+            title: Text(
+              'Partner Options',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Divider(),
+          ListTile(
             leading: Icon(Icons.payment),
             title: Provider.of<Partner>(context).partner == false
                 ? Text('Become a partner')
@@ -47,6 +55,15 @@ class AppDrawer extends StatelessWidget {
             onTap: () {
               Navigator.of(context)
                   .pushReplacementNamed(UserProductsScreen.routeName);
+            },
+          ),
+          Divider(),
+          ListTile(
+            leading: Icon(Icons.payments),
+            title: Text('My Product Orders'),
+            onTap: () {
+              Navigator.of(context)
+                  .pushReplacementNamed(MyProductOrdersScreen.routeName);
             },
           ),
           Divider(),

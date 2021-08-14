@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 // Providers Imports
 import '../providers/cart.dart';
 import '../providers/orders.dart';
+import '../providers/my_product_orders.dart';
 
 // Screen Imports
 import '../widgets/cart_item.dart';
@@ -99,7 +100,15 @@ class _OrderButtonState extends State<OrderButton> {
               });
               await Provider.of<Orders>(context, listen: false).addOrder(
                   widget.cart.items.values.toList(), widget.cart.totalAmount);
+              for (int i = 0; i < widget.cart.itemCount; i++) {
+                await Provider.of<MyProductOrders>(context, listen: false)
+                    .addProductOrder(
+                        widget.cart.items.keys.toList()[i],
+                        widget.cart
+                            .findProduct(widget.cart.items.keys.toList()[i]));
+              }
               widget.cart.clear();
+
               setState(() {
                 _isLoading = false;
               });
