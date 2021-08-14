@@ -12,7 +12,7 @@ class MyProductOrders with ChangeNotifier {
 
   List<Map<String, Object>> myProductOrders;
 
-  Future<void> addProductOrder(String productId) async {
+  Future<void> addProductOrder(String productId, int quantity) async {
     print('Done');
     final productUrl =
         "https://amazine-001-default-rtdb.firebaseio.com/products/$productId.json?auth=$_authToken";
@@ -27,6 +27,7 @@ class MyProductOrders with ChangeNotifier {
           'title': extractedProductedResponse['title'],
           'price': extractedProductedResponse['price'],
           'imageUrl': extractedProductedResponse['imageUrl'],
+          'quantity': quantity,
         }));
     print(extractedProductedResponse);
   }

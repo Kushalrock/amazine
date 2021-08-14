@@ -35,6 +35,10 @@ class Cart with ChangeNotifier {
     return total;
   }
 
+  int FindProduct(String key) {
+    return _items[key].qty;
+  }
+
   void addItem(String productId, double price, String title, String imageUrl) {
     if (_items.containsKey(productId)) {
       _items.update(

@@ -102,7 +102,10 @@ class _OrderButtonState extends State<OrderButton> {
                   widget.cart.items.values.toList(), widget.cart.totalAmount);
               for (int i = 0; i < widget.cart.itemCount; i++) {
                 await Provider.of<MyProductOrders>(context, listen: false)
-                    .addProductOrder(widget.cart.items.keys.toList()[i]);
+                    .addProductOrder(
+                        widget.cart.items.keys.toList()[i],
+                        widget.cart
+                            .FindProduct(widget.cart.items.keys.toList()[i]));
               }
               widget.cart.clear();
 
