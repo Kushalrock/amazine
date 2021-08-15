@@ -23,7 +23,7 @@ class MyProductOrders with ChangeNotifier {
 
   List<MyProductOrderItemProfile> myProductOrders = [];
 
-  Future<void> addProductOrder(String productId, int quantity) async {
+  Future<List<String>> addProductOrder(String productId, int quantity) async {
     print('Done');
     final productUrl =
         "https://amazine-001-default-rtdb.firebaseio.com/products/$productId.json?auth=$_authToken";
@@ -33,14 +33,29 @@ class MyProductOrders with ChangeNotifier {
     final creatorId = extractedProductedResponse['creatorId'];
     final url =
         "https://amazine-001-default-rtdb.firebaseio.com/myproductorders/$creatorId.json?auth=$_authToken";
-    http.post(url,
+    final responseFromOtherSide = await http.post(url,
         body: json.encode({
           'title': extractedProductedResponse['title'],
           'price': extractedProductedResponse['price'],
           'imageUrl': extractedProductedResponse['imageUrl'],
           'quantity': quantity,
         }));
-    print(extractedProductedResponse);
+    // print(extractedProductedResponse);
+    print(responseFromOtherSide);
+    print(responseFromOtherSide.body);
+    final responseFromOtherSideData =
+        json.decode(responseFromOtherSide.body) as Map<String, dynamic>;
+    return [responseFromOtherSideData['name'] as String, creatorId];
+  }
+
+  Future<void> linkData(
+      String userId, String myProductId, int num, List<String> lists) async {
+    final url =
+        "https://amazine-001-default-rtdb.firebaseio.com/myproductorders/$userId/$myProductId.json?auth=$_authToken";
+    final jsonEncodedData = json.encode(
+        {'ordererId': lists[1], 'productId': lists[0], 'num': num.toString()});
+    final resp = await http.patch(url, body: jsonEncodedData);
+    print(resp.body + "my products order");
   }
 
   Future<void> fetchAndSetMyProductOrders() async {

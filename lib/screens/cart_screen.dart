@@ -86,6 +86,7 @@ class OrderButton extends StatefulWidget {
 }
 
 class _OrderButtonState extends State<OrderButton> {
+  List<List<String>> lists = [];
   var _isLoading = false;
 
   @override
@@ -98,14 +99,22 @@ class _OrderButtonState extends State<OrderButton> {
               setState(() {
                 _isLoading = true;
               });
-              await Provider.of<Orders>(context, listen: false).addOrder(
-                  widget.cart.items.values.toList(), widget.cart.totalAmount);
               for (int i = 0; i < widget.cart.itemCount; i++) {
-                await Provider.of<MyProductOrders>(context, listen: false)
+                final response = await Provider.of<MyProductOrders>(context,
+                        listen: false)
                     .addProductOrder(
                         widget.cart.items.keys.toList()[i],
                         widget.cart
                             .findProduct(widget.cart.items.keys.toList()[i]));
+                print(response);
+                lists.add(response);
+              }
+              final resp = await Provider.of<Orders>(context, listen: false)
+                  .addOrder(widget.cart.items.values.toList(),
+                      widget.cart.totalAmount, lists);
+              for (int i = 0; i < lists.length; i++) {
+                Provider.of<MyProductOrders>(context, listen: false)
+                    .linkData(lists[i][1], lists[i][0], i, resp);
               }
               widget.cart.clear();
 
