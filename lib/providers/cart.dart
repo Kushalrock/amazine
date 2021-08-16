@@ -7,6 +7,7 @@ class CartItem {
   final double price;
   final String imageUrl;
   final String productCreatorId;
+  final String orderStatus;
 
   CartItem({
     @required this.id,
@@ -15,6 +16,7 @@ class CartItem {
     @required this.price,
     @required this.imageUrl,
     @required this.productCreatorId,
+    @required this.orderStatus,
   });
 }
 
@@ -42,7 +44,7 @@ class Cart with ChangeNotifier {
   }
 
   void addItem(String productId, double price, String title, String imageUrl,
-      String productCreatorId) {
+      String productCreatorId, String orderStatus) {
     if (_items.containsKey(productId)) {
       _items.update(
           productId,
@@ -52,7 +54,8 @@ class Cart with ChangeNotifier {
               qty: value.qty + 1,
               price: value.price,
               imageUrl: value.imageUrl,
-              productCreatorId: value.productCreatorId));
+              productCreatorId: value.productCreatorId,
+              orderStatus: value.orderStatus));
     } else {
       _items.putIfAbsent(
           productId,
@@ -62,7 +65,8 @@ class Cart with ChangeNotifier {
               price: price,
               qty: 1,
               imageUrl: imageUrl,
-              productCreatorId: productCreatorId));
+              productCreatorId: productCreatorId,
+              orderStatus: orderStatus));
     }
     notifyListeners();
   }
@@ -85,7 +89,8 @@ class Cart with ChangeNotifier {
             qty: value.qty - 1,
             price: value.price,
             imageUrl: value.imageUrl,
-            productCreatorId: value.productCreatorId),
+            productCreatorId: value.productCreatorId,
+            orderStatus: value.orderStatus),
       );
     } else {
       _items.remove(productId);

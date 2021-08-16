@@ -44,7 +44,8 @@ class Orders with ChangeNotifier {
         'quantity': cp[i].qty.toString(),
         'price': cp[i].price.toString(),
         'imageurl': cp[i].imageUrl,
-        'productcreatorid': lists[i][1]
+        'productcreatorid': lists[i][1],
+        'orderstatus': 'In Process',
       });
     }
     return returnData;
@@ -66,13 +67,13 @@ class Orders with ChangeNotifier {
           products: (orderData['products'] as List<dynamic>)
               .map(
                 (e) => CartItem(
-                  id: e['myproductid'],
-                  title: e['title'],
-                  qty: int.parse(e['quantity']),
-                  price: double.parse(e['price']),
-                  imageUrl: e['imageurl'],
-                  productCreatorId: e['productcreatorid'],
-                ),
+                    id: e['myproductid'],
+                    title: e['title'],
+                    qty: int.parse(e['quantity']),
+                    price: double.parse(e['price']),
+                    imageUrl: e['imageurl'],
+                    productCreatorId: e['productcreatorid'],
+                    orderStatus: e['orderstatus']),
               )
               .toList(),
           dateTime: DateTime.parse(orderData['dateTime'])));

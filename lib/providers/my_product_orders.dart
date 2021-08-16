@@ -3,6 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+// Provider Imports
+import './cart.dart';
+
 // Third Party Packages
 import 'package:http/http.dart' as http;
 
@@ -48,12 +51,33 @@ class MyProductOrders with ChangeNotifier {
     return [responseFromOtherSideData['name'] as String, creatorId];
   }
 
+  Future<void> cancelOrderUserSide(CartItem ci) async {
+    final creatorId = ci.productCreatorId;
+    final myProductOrderId = ci.id;
+    final url =
+        "https://amazine-001-default-rtdb.firebaseio.com/myproductorders/$creatorId/$myProductOrderId.json?auth=$_authToken";
+    final resp = await http.get(url);
+    final extractedResp = json.decode(resp.body) as Map<String, Object>;
+    final ordererId = extractedResp['ordererId'];
+    final productId = extractedResp['productId'];
+    final num = extractedResp['num'];
+    final productUrl =
+        "https://amazine-001-default-rtdb.firebaseio.com/orders/$ordererId/$productId/products/$num.json?auth=$_authToken";
+    // TO DOS USE POST REQUEST INSTEAD OF DELETE TO UPDATE DATA
+    await http.delete(productUrl);
+    await http.delete(url);
+  }
+
   Future<void> linkData(
       String userId, String myProductId, int num, List<String> lists) async {
     final url =
         "https://amazine-001-default-rtdb.firebaseio.com/myproductorders/$userId/$myProductId.json?auth=$_authToken";
-    final jsonEncodedData = json.encode(
-        {'ordererId': lists[1], 'productId': lists[0], 'num': num.toString()});
+    final jsonEncodedData = json.encode({
+      'ordererId': lists[1],
+      'productId': lists[0],
+      'num': num.toString(),
+      'orderstatus': 'In Process'
+    });
     final resp = await http.patch(url, body: jsonEncodedData);
     print(resp.body + "my products order");
   }
