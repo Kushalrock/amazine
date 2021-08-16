@@ -66,11 +66,13 @@ class Orders with ChangeNotifier {
           products: (orderData['products'] as List<dynamic>)
               .map(
                 (e) => CartItem(
-                    id: e['myproductid'],
-                    title: e['title'],
-                    qty: e['quantity'],
-                    price: e['price'],
-                    imageUrl: e['imageurl']),
+                  id: e['myproductid'],
+                  title: e['title'],
+                  qty: int.parse(e['quantity']),
+                  price: double.parse(e['price']),
+                  imageUrl: e['imageurl'],
+                  productCreatorId: e['productcreatorid'],
+                ),
               )
               .toList(),
           dateTime: DateTime.parse(orderData['dateTime'])));

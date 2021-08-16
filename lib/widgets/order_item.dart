@@ -62,7 +62,18 @@ class _OrderCardState extends State<OrderCard> {
                         fontSize: 18,
                         color: Colors.grey,
                       ),
-                    )
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {},
+                          icon: Icon(
+                            Icons.cancel,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
                 itemCount: widget.order.products.length,

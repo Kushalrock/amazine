@@ -59,6 +59,7 @@ class ProductItem extends StatelessWidget {
                 product.price,
                 product.title,
                 product.imageUrl,
+                '',
               );
               Scaffold.of(context).hideCurrentSnackBar();
               Scaffold.of(context).showSnackBar(
