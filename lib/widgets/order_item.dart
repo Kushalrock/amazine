@@ -2,9 +2,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_complete_guide/providers/my_product_orders.dart';
 
 //Third party packages imports
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 // Providers Imports
 import '../providers/orders.dart';
@@ -43,31 +45,39 @@ class _OrderCardState extends State<OrderCard> {
           ),
           if (_expanded)
             Container(
-              height: min(widget.order.products.length * 20.0 + 40.0, 250.0),
+              height: min(widget.order.products.length * 20.0 + 60.0, 250.0),
               padding: EdgeInsets.all(10),
               child: ListView.builder(
-                itemBuilder: (ctx, i) => Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      widget.order.products[i].title,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                itemBuilder: (ctx, i) => ListTile(
+                  leading: Image.network(
+                    widget.order.products[i].imageUrl,
+                    fit: BoxFit.cover,
+                  ),
+                  subtitle: Text(
+                    '${widget.order.products[i].qty}x \$${widget.order.products[i].price}',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey,
                     ),
-                    Text(
-                      '${widget.order.products[i].qty}x \$${widget.order.products[i].price}',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.grey,
-                      ),
-                    )
-                  ],
+                  ),
+                  isThreeLine: true,
+                  title: Text(widget.order.products[i].orderStatus),
+                  trailing: IconButton(
+                    onPressed: () async {
+                      await Provider.of<MyProductOrders>(context, listen: false)
+                          .cancelOrderUserSide(widget.order.products[i]);
+                      await Provider.of<Orders>(context, listen: false)
+                          .fetchAndSetorder();
+                    },
+                    icon: Icon(
+                      Icons.cancel,
+                      color: Colors.red,
+                    ),
+                  ),
                 ),
                 itemCount: widget.order.products.length,
               ),
-            )
+            ),
         ],
       ),
     );

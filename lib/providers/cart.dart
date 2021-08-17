@@ -6,6 +6,8 @@ class CartItem {
   final int qty;
   final double price;
   final String imageUrl;
+  final String productCreatorId;
+  final String orderStatus;
 
   CartItem({
     @required this.id,
@@ -13,6 +15,8 @@ class CartItem {
     @required this.qty,
     @required this.price,
     @required this.imageUrl,
+    @required this.productCreatorId,
+    @required this.orderStatus,
   });
 }
 
@@ -39,7 +43,8 @@ class Cart with ChangeNotifier {
     return _items[key].qty;
   }
 
-  void addItem(String productId, double price, String title, String imageUrl) {
+  void addItem(String productId, double price, String title, String imageUrl,
+      String productCreatorId, String orderStatus) {
     if (_items.containsKey(productId)) {
       _items.update(
           productId,
@@ -48,7 +53,9 @@ class Cart with ChangeNotifier {
               title: value.title,
               qty: value.qty + 1,
               price: value.price,
-              imageUrl: value.imageUrl));
+              imageUrl: value.imageUrl,
+              productCreatorId: value.productCreatorId,
+              orderStatus: value.orderStatus));
     } else {
       _items.putIfAbsent(
           productId,
@@ -57,7 +64,9 @@ class Cart with ChangeNotifier {
               title: title,
               price: price,
               qty: 1,
-              imageUrl: imageUrl));
+              imageUrl: imageUrl,
+              productCreatorId: productCreatorId,
+              orderStatus: orderStatus));
     }
     notifyListeners();
   }
@@ -75,12 +84,13 @@ class Cart with ChangeNotifier {
       _items.update(
         productId,
         (value) => CartItem(
-          id: value.id,
-          title: value.title,
-          qty: value.qty - 1,
-          price: value.price,
-          imageUrl: value.imageUrl,
-        ),
+            id: value.id,
+            title: value.title,
+            qty: value.qty - 1,
+            price: value.price,
+            imageUrl: value.imageUrl,
+            productCreatorId: value.productCreatorId,
+            orderStatus: value.orderStatus),
       );
     } else {
       _items.remove(productId);

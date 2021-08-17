@@ -3,6 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+// Provider Imports
+import './cart.dart';
+
 // Third Party Packages
 import 'package:http/http.dart' as http;
 
@@ -23,7 +26,7 @@ class MyProductOrders with ChangeNotifier {
 
   List<MyProductOrderItemProfile> myProductOrders = [];
 
-  Future<void> addProductOrder(String productId, int quantity) async {
+  Future<List<String>> addProductOrder(String productId, int quantity) async {
     print('Done');
     final productUrl =
         "https://amazine-001-default-rtdb.firebaseio.com/products/$productId.json?auth=$_authToken";
@@ -33,14 +36,84 @@ class MyProductOrders with ChangeNotifier {
     final creatorId = extractedProductedResponse['creatorId'];
     final url =
         "https://amazine-001-default-rtdb.firebaseio.com/myproductorders/$creatorId.json?auth=$_authToken";
-    http.post(url,
+    final responseFromOtherSide = await http.post(url,
         body: json.encode({
           'title': extractedProductedResponse['title'],
           'price': extractedProductedResponse['price'],
           'imageUrl': extractedProductedResponse['imageUrl'],
           'quantity': quantity,
         }));
-    print(extractedProductedResponse);
+    // print(extractedProductedResponse);
+    print(responseFromOtherSide);
+    print(responseFromOtherSide.body);
+    final responseFromOtherSideData =
+        json.decode(responseFromOtherSide.body) as Map<String, dynamic>;
+    return [responseFromOtherSideData['name'] as String, creatorId];
+  }
+
+  Future<void> cancelOrderUserSide(CartItem ci) async {
+    final creatorId = ci.productCreatorId;
+    final myProductOrderId = ci.id;
+    final url =
+        "https://amazine-001-default-rtdb.firebaseio.com/myproductorders/$creatorId/$myProductOrderId.json?auth=$_authToken";
+    final resp = await http.get(url);
+    final extractedResp = json.decode(resp.body) as Map<String, Object>;
+    final ordererId = extractedResp['ordererId'];
+    final productId = extractedResp['productId'];
+    final num = int.parse(extractedResp['num']);
+    final productUrl =
+        "https://amazine-001-default-rtdb.firebaseio.com/orders/$ordererId/$productId.json?auth=$_authToken";
+    final productUrlResp = await http.get(
+        "https://amazine-001-default-rtdb.firebaseio.com/orders/$ordererId/$productId.json?auth=$_authToken");
+
+    final extractedProductUrl =
+        json.decode(productUrlResp.body) as Map<String, Object>;
+
+    double extractedProductUrlAmount = 0;
+
+    final extractedProductUrlDateTime =
+        extractedProductUrl['dateTime'] as String;
+
+    final extractedProductUrlProducts =
+        extractedProductUrl['products'] as List<dynamic>;
+
+    extractedProductUrlProducts.removeAt(num);
+    if (extractedProductUrlProducts.length < 1) {
+      await http.delete(
+          "https://amazine-001-default-rtdb.firebaseio.com/orders/$ordererId/$productId.json?auth=$_authToken");
+      await http.delete(url);
+      return;
+    }
+    for (int i = 0; i < extractedProductUrlProducts.length; i++) {
+      final price = double.parse(extractedProductUrlProducts[i]['price']);
+      final qty = int.parse(extractedProductUrlProducts[i]['quantity']);
+      extractedProductUrlAmount += price * qty;
+    }
+    final sentData = json.encode({
+      'amount': extractedProductUrlAmount,
+      'dateTime': extractedProductUrlDateTime,
+      'products': extractedProductUrlProducts
+    });
+    print(sentData);
+    await http.patch(productUrl, body: sentData);
+    // print(sentData);
+    // TO DOS USE POST REQUEST INSTEAD OF DELETE TO UPDATE DATA
+    // await http.delete(productUrl);
+    await http.delete(url);
+  }
+
+  Future<void> linkData(
+      String userId, String myProductId, int num, List<String> lists) async {
+    final url =
+        "https://amazine-001-default-rtdb.firebaseio.com/myproductorders/$userId/$myProductId.json?auth=$_authToken";
+    final jsonEncodedData = json.encode({
+      'ordererId': lists[1],
+      'productId': lists[0],
+      'num': num.toString(),
+      'orderstatus': 'In Process'
+    });
+    final resp = await http.patch(url, body: jsonEncodedData);
+    print(resp.body + "my products order");
   }
 
   Future<void> fetchAndSetMyProductOrders() async {
@@ -50,6 +123,10 @@ class MyProductOrders with ChangeNotifier {
     final response = await http.get(url);
     final extractedData = json.decode(response.body) as Map<String, Object>;
     // print(extractedData.length);
+    if (extractedData.isEmpty) {
+      myProductOrders = [];
+      return;
+    }
     for (int i = 0; i <= extractedData.length; i++) {
       final finalData =
           extractedData[extractedData.keys.toList()[i]] as Map<String, Object>;

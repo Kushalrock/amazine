@@ -34,6 +34,23 @@ class Orders with ChangeNotifier {
     return [..._orders];
   }
 
+  List<Map<String, String>> setOrder(
+      List<CartItem> cp, List<List<String>> lists) {
+    List<Map<String, String>> returnData = [];
+    for (int i = 0; i < cp.length; i++) {
+      returnData.add({
+        'myproductid': lists[i][0],
+        'title': cp[i].title,
+        'quantity': cp[i].qty.toString(),
+        'price': cp[i].price.toString(),
+        'imageurl': cp[i].imageUrl,
+        'productcreatorid': lists[i][1],
+        'orderstatus': 'In Process',
+      });
+    }
+    return returnData;
+  }
+
   Future<void> fetchAndSetorder() async {
     final url =
         "https://amazine-001-default-rtdb.firebaseio.com/orders/$userId.json?auth=$_authToken";
@@ -50,11 +67,13 @@ class Orders with ChangeNotifier {
           products: (orderData['products'] as List<dynamic>)
               .map(
                 (e) => CartItem(
-                    id: e['id'],
+                    id: e['myproductid'],
                     title: e['title'],
-                    qty: e['quantity'],
-                    price: e['price'],
-                    imageUrl: e['imageUrl']),
+                    qty: int.parse(e['quantity']),
+                    price: double.parse(e['price']),
+                    imageUrl: e['imageurl'],
+                    productCreatorId: e['productcreatorid'],
+                    orderStatus: e['orderstatus']),
               )
               .toList(),
           dateTime: DateTime.parse(orderData['dateTime'])));
@@ -63,7 +82,8 @@ class Orders with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addOrder(List<CartItem> cartProducts, double total) async {
+  Future<List<String>> addOrder(List<CartItem> cartProducts, double total,
+      List<List<String>> lists) async {
     final url =
         'https://amazine-001-default-rtdb.firebaseio.com/orders/$userId.json?auth=$_authToken';
     final timeStamp = DateTime.now();
@@ -71,16 +91,10 @@ class Orders with ChangeNotifier {
         body: json.encode({
           'amount': total,
           'dateTime': timeStamp.toIso8601String(),
-          'products': cartProducts
-              .map((cp) => {
-                    'id': cp.id,
-                    'title': cp.title,
-                    'quantity': cp.qty,
-                    'price': cp.price,
-                    'imageUrl': cp.imageUrl
-                  })
-              .toList(),
+          'products': setOrder(cartProducts, lists),
         }));
+    print(response.body + " from Orders.dart file");
+    final respData = json.decode(response.body) as Map<String, dynamic>;
     _orders.insert(
       0,
       OrderItem(
@@ -91,5 +105,6 @@ class Orders with ChangeNotifier {
       ),
     );
     notifyListeners();
+    return [respData['name'] as String, userId];
   }
 }
