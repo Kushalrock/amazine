@@ -18,8 +18,31 @@ class MyProductOrderItem extends StatelessWidget {
           fit: BoxFit.cover,
         ),
         title: Text(title),
-        subtitle: Text('$quantity X $price =   ${price * quantity}'),
-        trailing: Text(quantity.toString()),
+        trailing: Text('$quantity X $price =   ${price * quantity}'),
+        subtitle: Row(
+          children: [
+            IconButton(
+              onPressed: () {},
+              icon: Icon(
+                Icons.check,
+                color: Colors.green,
+              ),
+            ),
+            IconButton(
+              onPressed: () {},
+              icon: Icon(
+                Icons.cancel_outlined,
+                color: Colors.red,
+              ),
+            ),
+            IconButton(
+                onPressed: () {},
+                icon: Icon(
+                  Icons.unarchive,
+                  color: Colors.yellow,
+                ))
+          ],
+        ),
       ),
     );
   }

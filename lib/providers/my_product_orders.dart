@@ -127,6 +127,7 @@ class MyProductOrders with ChangeNotifier {
       myProductOrders = [];
       return;
     }
+    myProductOrders = [];
     for (int i = 0; i <= extractedData.length; i++) {
       final finalData =
           extractedData[extractedData.keys.toList()[i]] as Map<String, Object>;
