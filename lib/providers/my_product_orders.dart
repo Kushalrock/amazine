@@ -60,11 +60,45 @@ class MyProductOrders with ChangeNotifier {
     final extractedResp = json.decode(resp.body) as Map<String, Object>;
     final ordererId = extractedResp['ordererId'];
     final productId = extractedResp['productId'];
-    final num = extractedResp['num'];
+    final num = int.parse(extractedResp['num']);
     final productUrl =
-        "https://amazine-001-default-rtdb.firebaseio.com/orders/$ordererId/$productId/products/$num.json?auth=$_authToken";
+        "https://amazine-001-default-rtdb.firebaseio.com/orders/$ordererId/$productId.json?auth=$_authToken";
+    final productUrlResp = await http.get(
+        "https://amazine-001-default-rtdb.firebaseio.com/orders/$ordererId/$productId.json?auth=$_authToken");
+
+    final extractedProductUrl =
+        json.decode(productUrlResp.body) as Map<String, Object>;
+
+    double extractedProductUrlAmount = 0;
+
+    final extractedProductUrlDateTime =
+        extractedProductUrl['dateTime'] as String;
+
+    final extractedProductUrlProducts =
+        extractedProductUrl['products'] as List<dynamic>;
+
+    extractedProductUrlProducts.removeAt(num);
+    if (extractedProductUrlProducts.length < 1) {
+      await http.delete(
+          "https://amazine-001-default-rtdb.firebaseio.com/orders/$ordererId/$productId.json?auth=$_authToken");
+      await http.delete(url);
+      return;
+    }
+    for (int i = 0; i < extractedProductUrlProducts.length; i++) {
+      final price = double.parse(extractedProductUrlProducts[i]['price']);
+      final qty = int.parse(extractedProductUrlProducts[i]['quantity']);
+      extractedProductUrlAmount += price * qty;
+    }
+    final sentData = json.encode({
+      'amount': extractedProductUrlAmount,
+      'dateTime': extractedProductUrlDateTime,
+      'products': extractedProductUrlProducts
+    });
+    print(sentData);
+    await http.patch(productUrl, body: sentData);
+    // print(sentData);
     // TO DOS USE POST REQUEST INSTEAD OF DELETE TO UPDATE DATA
-    await http.delete(productUrl);
+    // await http.delete(productUrl);
     await http.delete(url);
   }
 
@@ -89,6 +123,10 @@ class MyProductOrders with ChangeNotifier {
     final response = await http.get(url);
     final extractedData = json.decode(response.body) as Map<String, Object>;
     // print(extractedData.length);
+    if (extractedData.isEmpty) {
+      myProductOrders = [];
+      return;
+    }
     for (int i = 0; i <= extractedData.length; i++) {
       final finalData =
           extractedData[extractedData.keys.toList()[i]] as Map<String, Object>;
