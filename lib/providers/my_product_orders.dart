@@ -17,9 +17,23 @@ class MyProductOrderItemProfile {
   final String address;
   final String number;
   final String name;
+  final String ordererId;
+  final String num;
+  final String productId;
+  final String orderStatus;
 
-  MyProductOrderItemProfile(this.imageUrl, this.quantity, this.price,
-      this.title, this.address, this.number, this.name);
+  MyProductOrderItemProfile(
+      this.imageUrl,
+      this.quantity,
+      this.price,
+      this.title,
+      this.address,
+      this.number,
+      this.name,
+      this.ordererId,
+      this.productId,
+      this.num,
+      this.orderStatus);
 }
 
 class MyProductOrders with ChangeNotifier {
@@ -148,7 +162,11 @@ class MyProductOrders with ChangeNotifier {
             finalData['title'] as String,
             finalData['address'] as String,
             finalData['mobile'] as String,
-            finalData['name'] as String),
+            finalData['name'] as String,
+            finalData['ordererId'] as String,
+            finalData['productId'] as String,
+            finalData['num'] as String,
+            finalData['orderstatus'] as String),
       );
       print(myProductOrders[i].imageUrl);
     }
