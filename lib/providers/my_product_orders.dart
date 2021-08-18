@@ -14,9 +14,12 @@ class MyProductOrderItemProfile {
   final int quantity;
   final double price;
   final String title;
+  final String address;
+  final String number;
+  final String name;
 
-  MyProductOrderItemProfile(
-      this.imageUrl, this.quantity, this.price, this.title);
+  MyProductOrderItemProfile(this.imageUrl, this.quantity, this.price,
+      this.title, this.address, this.number, this.name);
 }
 
 class MyProductOrders with ChangeNotifier {
@@ -26,7 +29,8 @@ class MyProductOrders with ChangeNotifier {
 
   List<MyProductOrderItemProfile> myProductOrders = [];
 
-  Future<List<String>> addProductOrder(String productId, int quantity) async {
+  Future<List<String>> addProductOrder(String productId, int quantity,
+      String address, String name, String mobile) async {
     print('Done');
     final productUrl =
         "https://amazine-001-default-rtdb.firebaseio.com/products/$productId.json?auth=$_authToken";
@@ -42,6 +46,9 @@ class MyProductOrders with ChangeNotifier {
           'price': extractedProductedResponse['price'],
           'imageUrl': extractedProductedResponse['imageUrl'],
           'quantity': quantity,
+          'address': address,
+          'mobile': mobile,
+          'name': name
         }));
     // print(extractedProductedResponse);
     print(responseFromOtherSide);
@@ -76,14 +83,14 @@ class MyProductOrders with ChangeNotifier {
 
     final extractedProductUrlProducts =
         extractedProductUrl['products'] as List<dynamic>;
-
-    extractedProductUrlProducts.removeAt(num);
-    if (extractedProductUrlProducts.length < 1) {
+    if (extractedProductUrlProducts.length <= 1) {
       await http.delete(
           "https://amazine-001-default-rtdb.firebaseio.com/orders/$ordererId/$productId.json?auth=$_authToken");
       await http.delete(url);
       return;
     }
+    extractedProductUrlProducts.removeAt(num);
+
     for (int i = 0; i < extractedProductUrlProducts.length; i++) {
       final price = double.parse(extractedProductUrlProducts[i]['price']);
       final qty = int.parse(extractedProductUrlProducts[i]['quantity']);
@@ -127,6 +134,7 @@ class MyProductOrders with ChangeNotifier {
       myProductOrders = [];
       return;
     }
+    myProductOrders = [];
     for (int i = 0; i <= extractedData.length; i++) {
       final finalData =
           extractedData[extractedData.keys.toList()[i]] as Map<String, Object>;
@@ -137,7 +145,10 @@ class MyProductOrders with ChangeNotifier {
             finalData['imageUrl'] as String,
             finalData['quantity'] as int,
             finalData['price'] as double,
-            finalData['title'] as String),
+            finalData['title'] as String,
+            finalData['address'] as String,
+            finalData['mobile'] as String,
+            finalData['name'] as String),
       );
       print(myProductOrders[i].imageUrl);
     }

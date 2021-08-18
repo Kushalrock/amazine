@@ -17,6 +17,11 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cart = Provider.of<Cart>(context);
+
+    final nameController = TextEditingController();
+    final addressController = TextEditingController();
+    final numberController = TextEditingController();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Your Cart'),
@@ -27,27 +32,54 @@ class CartScreen extends StatelessWidget {
             margin: EdgeInsets.all(15),
             child: Padding(
               padding: EdgeInsets.all(10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
                 children: [
-                  Text(
-                    'Total',
-                    style: TextStyle(
-                      fontSize: 20,
-                    ),
-                  ),
-                  Consumer<Cart>(
-                    builder: (ctx, cartData, _) => Chip(
-                      label: Text(
-                        '\$${cartData.totalAmount.toStringAsFixed(2)}',
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total',
                         style: TextStyle(
-                          color: Theme.of(context).primaryTextTheme.title.color,
+                          fontSize: 20,
                         ),
                       ),
-                      backgroundColor: Theme.of(context).primaryColor,
-                    ),
+                      Consumer<Cart>(
+                        builder: (ctx, cartData, _) => Chip(
+                          label: Text(
+                            '\$${cartData.totalAmount.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .primaryTextTheme
+                                  .title
+                                  .color,
+                            ),
+                          ),
+                          backgroundColor: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      OrderButton(
+                        cart: cart,
+                        addressController: addressController,
+                        nameController: nameController,
+                        numberController: numberController,
+                      ),
+                    ],
                   ),
-                  OrderButton(cart: cart),
+                  TextField(
+                    decoration: InputDecoration(labelText: 'Name'),
+                    controller: nameController,
+                  ),
+                  TextField(
+                    keyboardType: TextInputType.streetAddress,
+                    decoration: InputDecoration(labelText: 'Address'),
+                    controller: addressController,
+                  ),
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(labelText: 'Mobile No.'),
+                    controller: numberController,
+                    maxLength: 10,
+                  ),
                 ],
               ),
             ),
@@ -77,9 +109,15 @@ class OrderButton extends StatefulWidget {
   const OrderButton({
     Key key,
     @required this.cart,
+    @required this.nameController,
+    @required this.addressController,
+    @required this.numberController,
   }) : super(key: key);
 
   final Cart cart;
+  final TextEditingController nameController;
+  final TextEditingController addressController;
+  final TextEditingController numberController;
 
   @override
   _OrderButtonState createState() => _OrderButtonState();
@@ -91,6 +129,25 @@ class _OrderButtonState extends State<OrderButton> {
 
   @override
   Widget build(BuildContext context) {
+    bool _checkingTextInputs() {
+      print('I am being checked');
+      if (widget.addressController.text == "" ||
+          widget.nameController.text == "" ||
+          widget.numberController.text == "") {
+        return true;
+      }
+      print(widget.numberController.text.length);
+      if (widget.numberController.text.length < 10) {
+        return true;
+      }
+      return false;
+    }
+
+    void _showError() {
+      Scaffold.of(context).showSnackBar(
+          SnackBar(content: Text('Please input the details correctly!!')));
+    }
+
     return FlatButton(
       child: _isLoading ? CircularProgressIndicator() : Text('ORDER NOW!!'),
       onPressed: (widget.cart.totalAmount <= 0 || _isLoading)
@@ -99,13 +156,23 @@ class _OrderButtonState extends State<OrderButton> {
               setState(() {
                 _isLoading = true;
               });
+              if (_checkingTextInputs()) {
+                _showError();
+                setState(() {
+                  _isLoading = false;
+                });
+                return;
+              }
               for (int i = 0; i < widget.cart.itemCount; i++) {
                 final response = await Provider.of<MyProductOrders>(context,
                         listen: false)
                     .addProductOrder(
                         widget.cart.items.keys.toList()[i],
                         widget.cart
-                            .findProduct(widget.cart.items.keys.toList()[i]));
+                            .findProduct(widget.cart.items.keys.toList()[i]),
+                        widget.addressController.text,
+                        widget.nameController.text,
+                        widget.numberController.text);
                 print(response);
                 lists.add(response);
               }
